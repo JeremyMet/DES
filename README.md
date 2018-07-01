@@ -11,7 +11,7 @@ To run the bash script, type the following
 ```
 where "encrypt" can be replaced by "decrypt" depending on the purpose. First argument is the input (i.e. the folder to be encrypted) and second is the output folder path (that should not already exist).
 
-Encryption is performed with the *0xDEADBEEF* default key and can be changed by editing encrypto_folder.sh. Moreover, one also has to define the python scripts path (in the *DES_path* variables). 
+Encryption is performed with the *0xDEADBEEF* default key and can be changed by editing encrypt_folder.sh. Moreover, one also has to define the python scripts path (in the *DES_path* variables). 
 
 Encryption/Decryption is not that fast (85 seconds to encrypt a 1.5 MB file on a 3.6 GHz machine).
 
