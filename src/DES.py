@@ -5,7 +5,7 @@ import random ;
 import time ;
 import sys ;
 
-BUFFER_SIZE = 1024 # In bytes
+BUFFER_SIZE = 128 # In bytes (at least 8 bytes)
 
 class DES(object):
 
@@ -52,8 +52,6 @@ class DES(object):
             fid_output.write(size.to_bytes(8, "big")) ;
         else:
             size = int.from_bytes(fid_input.read(8), "big") ;
-            print("debug")
-            print(size)
         cpt = 0 ;
         while(cpt < size):
             chunk = fid_input.read(BUFFER_SIZE) ;
@@ -172,7 +170,7 @@ if __name__ == "__main__":
         encrypt_decrypt = sys.argv[4] ;
         if encrypt_decrypt == "encrypt":
             DES.encrypt_file_ECB(input_file, output_file, key) ;
-        else:
+        elif encrypt_decrypt == "decrypt":
             DES.decrypt_file_ECB(input_file, output_file, key);
 
 
