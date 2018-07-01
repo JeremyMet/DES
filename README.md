@@ -13,7 +13,7 @@ where "encrypt" can be replaced by "decrypt" depending on the purpose. First arg
 
 Encryption is performed with the *0xDEADBEEF* default key and can be changed by editing encrypto_folder.sh. Moreover, one also has to define the python scripts path (in the *DES_path* variables). 
 
-Encryption/Decryption is not that fast (85 seconds to encrypt a 1.5 MB file).
+Encryption/Decryption is not that fast (85 seconds to encrypt a 1.5 MB file on a 3.6 GHz machine).
 
 If you see any bug, don't hesitate to contact me ;-)
 
