@@ -1,9 +1,9 @@
 # DES
 
-Core DES program has been written in a C-like fashion with a lot of bit-level operators (as shifts <<, >> and so on).
-For now, one can only perform ECB encryption/decryyption.
-The git includes a bash script that allows the user to encrypt the content of a given folder recursively
-(Yesh, I know, it would have been more clever to compress the directory beforehand but goal of the project was also to learn bash).
+DES core program has been written in a C-like fashion with a lot of bit-level operators (as shifts <<, >> and so on).
+For now, one can only perform ECB encryption/decryption.
+The git includes a bash script that allows the user to encrypt/decrypt the content of a given folder recursively
+(Yesh, I know, it would have been more clever to compress the directory beforehand but goal of the project was also to learn some bash).
 
 To run the bash script, type the following
 ```bash
@@ -15,6 +15,6 @@ Encryption is performed with the *0xDEADBEEF* default key and can be changed by 
 
 Encryption/Decryption is not that fast (85 seconds to encrypt a 1.5 MB file on a 3.6 GHz machine).
 
-If you see any bug, don't hesitate to contact me ;-)
+If you meet any bug, don't hesitate to contact me ;-)
 
 PS : Please note the DES constants part has been copied/pasted from Robin David's git (https://github.com/RobinDavid/pydes).
