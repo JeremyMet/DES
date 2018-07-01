@@ -2,7 +2,7 @@
 
 Core DES program has been written in a C-like fashion with a lot of bit-level operators (as shifts <<, >> and so on).
 For now, one can only perform ECB encryption/decryyption.
-The git includes a bash script that allows the user to encrypt an entire folder recursively
+The git includes a bash script that allows the user to encrypt the whole content from a given folder recursively
 (Yesh, I know, it would have been more clever to compress the directory beforehand but goal of the project was also to learn bash).
 
 To run the bash script, type the following
