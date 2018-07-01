@@ -1,7 +1,11 @@
 
+import os ;
 from DES_Constants import * ;
 import random ;
 import time ;
+import sys ;
+
+BUFFER_SIZE = 1024 # In bytes
 
 class DES(object):
 
@@ -40,15 +44,34 @@ class DES(object):
 
     @staticmethod
     def internal_encrypt_decrypt_file_ECB(input_file, output_file, key, encrypt = True):
-        fid_input = open(input_file, "rb") ;
-        fid_output = open(output_file, "wb") ;
-        block = [0] ;
-        while(block):
-            block = fid_input.read(8) ;
-            block_to_write = DES.convert_byte_to_block(block) ;
-            block_to_write = DES.internal_encrypt_decrypt(block_to_write, key, encrypt) ;
-            block_to_write = block_to_write.to_bytes(8, "big") ;
-            fid_output.write(block_to_write) ;
+        fid_input = open(input_file, "rb");
+        fid_output = open(output_file, "wb");
+        # Header will contain the genuine file size.
+        if encrypt:
+            size = os.path.getsize(input_file) ;
+            fid_output.write(size.to_bytes(8, "big")) ;
+        else:
+            size = int.from_bytes(fid_input.read(8), "big") ;
+            print("debug")
+            print(size)
+        cpt = 0 ;
+        while(cpt < size):
+            chunk = fid_input.read(BUFFER_SIZE) ;
+            len_chunk = len(chunk) ;
+            chunk_buffer = bytearray(b"");
+            for i in range(0, len_chunk, 8):
+                block = chunk[i:min(len_chunk, i+8)] ;
+                block_to_write = DES.convert_byte_to_block(block) ;
+                block_to_write = DES.internal_encrypt_decrypt(block_to_write, key, encrypt) ;
+                block_to_write = block_to_write.to_bytes(8, "big") ;
+                chunk_buffer.extend(block_to_write) ;
+            cpt+=len_chunk ;
+            dist_with_end_file = max(cpt-size, 0) ;
+            if dist_with_end_file and not(encrypt):
+                upper_bound = size%BUFFER_SIZE ;
+            else:
+                upper_bound = BUFFER_SIZE ;
+            fid_output.write(chunk_buffer[:upper_bound]) ;
         fid_input.close() ;
         fid_output.close() ;
 
@@ -60,9 +83,6 @@ class DES(object):
     @staticmethod
     def decrypt_file_ECB(input_file, output_file, key):
         DES.internal_encrypt_decrypt_file_ECB(input_file, output_file, key, False);
-
-
-
 
 
     @staticmethod
@@ -107,25 +127,52 @@ class DES(object):
 if __name__ == "__main__":
     key = int("8000000000000000", 16) ;
     plain = int("DEADBEEF", 16) ;
-    iteration = 1 ;
 
-    start = time.time() ;
-    cipher = plain ;
-    for _ in range(iteration):
-        cipher = DES.encrypt(cipher, key) ;
-    end = time.time()-start ;
-    print("Nb of Iter: "+str(iteration))
-    print("Plain: "+str(hex(plain))) ,
-    print("Key: "+str(hex(key))) ;
-    print("Cipher: "+str(hex(cipher))) ;
-    print("Computed in "+str(end)+" ms") ;
-    print(hex(DES.decrypt(cipher, key))) ;
+    bench = [False, False, True] ;
+
+    ## Bench 0
+    if bench[0]:
+        iteration = 100 ;
+        start = time.time() ;
+        cipher = plain ;
+        for _ in range(iteration):
+            cipher = DES.encrypt(cipher, key) ;
+        end = time.time()-start ;
+        print("Nb of Iter: "+str(iteration))
+        print("Plain: "+str(hex(plain))) ,
+        print("Key: "+str(hex(key))) ;
+        print("Cipher: "+str(hex(cipher))) ;
+        print("Computed in "+str(end)+" ms.") ;
+        print(hex(DES.decrypt(cipher, key))) ;
 
 
-    DES.encrypt_file_ECB("/home/jmetairie/encrypted_files/bretagne.jpg", "/home/jmetairie/encrypted_files/bretagne_enc.jpg", key)
-    DES.decrypt_file_ECB("/home/jmetairie/encrypted_files/bretagne_enc.jpg",
-                         "/home/jmetairie/encrypted_files/bretagne_dec.jpg", key)
+    ## Bench 1
+    if bench[1]:
+        path = "/home/tersaken/Images/Projets/DES/" ;
+        print("Size of file to be encrypted is " + str(os.path.getsize(path + "bretagne.jpg")) + " bytes.");
+        start = time.time();
+        DES.encrypt_file_ECB(path+"bretagne.jpg", path+"bretagne_enc.jpg", key)
+        end = time.time() - start;
+        print("Encryption in "+str(end)+" ms.") ;
+        start = time.time();
+        DES.decrypt_file_ECB(path+"bretagne_enc.jpg",
+                             path+"bretagne_dec.jpg", key)
+        end = time.time() - start;
+        print("Decryption in " + str(end) + " ms.");
+
+    path = "/home/tersaken/Images/Projets/DES/";
 
 
+    ## Bench 2
+
+    if bench[2]:
+        input_file = sys.argv[1] ;
+        output_file = sys.argv[2] ;
+        key = int((sys.argv[3]), 16) ;
+        encrypt_decrypt = sys.argv[4] ;
+        if encrypt_decrypt == "encrypt":
+            DES.encrypt_file_ECB(input_file, output_file, key) ;
+        else:
+            DES.decrypt_file_ECB(input_file, output_file, key);
 
 
