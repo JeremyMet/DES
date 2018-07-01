@@ -17,4 +17,4 @@ Encryption/Decryption is not that fast (85 seconds to encrypt a 1.5 MB file on a
 
 If you see any bug, don't hesitate to contact me ;-)
 
-PS : Please not the DES constants part has been copy/paste from Robin David's git (https://github.com/RobinDavid/pydes).
+PS : Please note the DES constants part has been copy/paste from Robin David's git (https://github.com/RobinDavid/pydes).
