@@ -9,7 +9,6 @@ BUFFER_SIZE = 128 # In bytes (at least 8 bytes)
 
 class DES(object):
 
-
     @staticmethod
     def precompute_key(key):
         LSH = lambda x, shf: ((x << shf) ^ (x >> (28 - shf))) & 0xfffffff;
@@ -81,7 +80,6 @@ class DES(object):
         fid_input.close() ;
         fid_output.close() ;
 
-
     @staticmethod
     def encrypt_file_ECB(input_file, output_file, key):
         DES.precompute_key(key);
@@ -91,7 +89,6 @@ class DES(object):
     def decrypt_file_ECB(input_file, output_file, key):
         DES.precompute_key(key);
         DES.internal_encrypt_decrypt_file_ECB(input_file, output_file, False);
-
 
     @staticmethod
     def convert_byte_to_block(byte):
@@ -133,10 +130,9 @@ class DES(object):
         return ret ;
 
 if __name__ == "__main__":
+
     key = int("8000000000000000", 16) ;
     plain = int("DEADBEEF", 16) ;
-
-
     bench = [True, False, False] ;
 
     ## Bench 0
@@ -159,8 +155,6 @@ if __name__ == "__main__":
         print("Computed in "+str(end)+" ms.") ;
         print(hex(DES.decrypt(cipher, key))) ;
 
-
-
     ## Bench 1
     if bench[1]:
         path = "/home/tersaken/Images/Projets/DES/" ;
@@ -175,9 +169,6 @@ if __name__ == "__main__":
         end = time.time() - start;
         print("Decryption in " + str(end) + " ms.");
 
-    path = "/home/tersaken/Images/Projets/DES/";
-
-
     ## Bench 2
     if bench[2]:
         input_file = sys.argv[1] ;
@@ -188,5 +179,3 @@ if __name__ == "__main__":
             DES.encrypt_file_ECB(input_file, output_file, key) ;
         elif encrypt_decrypt == "decrypt":
             DES.decrypt_file_ECB(input_file, output_file, key);
-
-
