@@ -108,7 +108,7 @@ void apply_Feistel(unsigned char* half_block, unsigned char* subkey, unsigned ch
 
 // len_array is given in bits ; 
 // key is 56 bits. 
-void key_shift(unsigned char* key, unsigned int shift) {
+void left_key_shift(unsigned char* key, unsigned int shift) {
 
 	unsigned char tmp_0 ;
 	unsigned char tmp_1 ;  
@@ -117,16 +117,41 @@ void key_shift(unsigned char* key, unsigned int shift) {
 	for(j=0 ; j < shift ; j++) {
 		tmp_0 = (key[0] >> 7) & 1 ;
 		tmp_1 = (key[3] >> 3) & 1 ;
-		for(i=0 ; i < 7 ; i++)
+		for(i=0 ; i < 6 ; i++)
 		{
 			key[i] = (key[i] << 1) ^ (key[i+1] >> 7) ;
 		}
 		key[3] = (key[3] & 0xEF)^(tmp_0 << 4) ; 
-		key[6] ^= tmp_1 ; 
+		key[6] = (key[6] << 1)^tmp_1 ; 
 	} 	
 }
 
-void internal_encrypt_decrypt(unsigned char* input, unsigned char* key, unsigned char* ret)
+// len_array is given in bits ; 
+// key is 56 bits. 
+// Could used left_key_shift but then decryption would have been more "costly" than encryption :-(
+void right_key_shift(unsigned char* key, unsigned int shift) {
+
+	unsigned char tmp_0 ;
+	unsigned char tmp_1 ;  
+	int i ; int j ; 
+	// Bit granularity.
+	for(j=0 ; j < shift ; j++) {
+		tmp_0 = (key[3] >> 4) & 1 ;
+		tmp_1 = key[6] & 1 ;
+		for(i=6 ; i > 0 ; i--)
+		{
+			key[i] = (key[i] >> 1) ^ ((key[i-1] & 1) << 7) ;
+		}
+		key[0] = (key[0] >> 1) ^ (tmp_0 << 7) ; 
+		key[3] = (key[3] & 0xF7) ^ (tmp_1 << 3) ; 
+	} 	
+}
+
+
+// op == 'E' for Encryption
+// op == 'D" for Decryption
+
+void internal_encrypt_decrypt(unsigned char* input, unsigned char* key, unsigned char* ret, char op)
 {
 	// Variables
 	int i ; 
@@ -146,7 +171,12 @@ void internal_encrypt_decrypt(unsigned char* input, unsigned char* key, unsigned
 	// Iterating over the 16 rounds of the DES algorithm. 
 	int round ; 
 	for(round=0 ; round < 16 ; round++) {
-  		key_shift(permuted_key, SHIFT[round]) ; 
+		if (op == 'E') {
+	  		left_key_shift(permuted_key, SHIFT[round]) ; 
+		}
+		else if (op == 'D') {
+			right_key_shift(permuted_key, SHIFT[16-round]) ; 
+		}
 		apply_Permutation(CP2, permuted_key, 48, 56, subkey) ; 
 		// Apply Feistel
 		apply_Feistel(R, subkey, tmp_R) ; 
@@ -174,6 +204,14 @@ void internal_encrypt_decrypt(unsigned char* input, unsigned char* key, unsigned
 	
 }
 
+void encrypt(unsigned char* input, unsigned char* key, unsigned char* ret) {
+	internal_encrypt_decrypt(input, key, ret, 'E') ; 
+}
+
+void decrypt(unsigned char* input, unsigned char* key, unsigned char* ret) {
+	internal_encrypt_decrypt(input, key, ret, 'D') ; 
+}
+
 
 void main(int argc, char* argv[]) {
 
@@ -181,7 +219,8 @@ void main(int argc, char* argv[]) {
 	unsigned char* input = malloc(8*sizeof(unsigned char)) ;  
 	unsigned char* ret = malloc(8*sizeof(unsigned char)) ;  
 	int i ;
-	int iterations = atoi(argv[1]) ; 
+	int iterations = atoi(argv[1]) ;
+
 	key[0] = 0x80 ;  
 	for(i=1 ; i<8 ; i++)
 	{
@@ -194,7 +233,7 @@ void main(int argc, char* argv[]) {
 	printf("Nb of iterations ... %i \n", iterations) ; 
 	clock_t begin = clock();
 	for(i=0;i<iterations;i++) {
-		internal_encrypt_decrypt(input, key, ret) ; 
+		encrypt(input, key, ret) ; 
 		memcpy(input, ret, 8) ; 
 	}
 	clock_t end = clock();
