@@ -13,7 +13,7 @@ do
 	python3 ./src/DES.py $(($i*10000))
 	end_p=`date +%s.%N`
 	start_c=`date +%s.%N`
-	./c_src/des.out $(($i*10000))
+	./c_src/des.exe $(($i*10000))
 	end_c=`date +%s.%N`
 	time_p=$(echo "$end_p - $start_p" | bc) ; 
 	time_c=$(echo "$end_c - $start_c" | bc) ; 

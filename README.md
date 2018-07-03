@@ -32,6 +32,6 @@ A DES is called #iterations time (from 10,000 to 100,000 with a 10,000 steps). B
 
 I don't really know how to "interpret" the results. This "gap" was actually expected. However, it is trully substantial. Maybe, I did not code in a "pythonic" way, plus I'm quite sure Python does not "like" bit-level operations that much.
 
-## What about saving the round keys once for all (in case DES is called several times with the same key) ?
+~~## What about saving the round keys once for all (in case DES is called several times with the same key) ?~~
 
 Yes, it needs to be done (for both implementations).
