@@ -25,7 +25,7 @@ PS : Please note the DES constants part has been copied/pasted from Robin David'
 
 The C implementation was written in order to compare performances (compiled language version interpreted language). The implementation was thought for 8-bit architecture, i.e. all operations are performed with byte granularity (no use of 16-bit or 32-bit integers or even bigger). Thus, this code could be utilized on small Arduino (as the Nano for instance). This is no surprise to observe a "gap". We observed (at least) a 10 speedup factor in favor of C. See below: 
 
-![alt text](https://raw.githubusercontent.com/JeremyMet/DES/master/benchmark.png "Python/C Benchmark")
+<center>![alt text](https://raw.githubusercontent.com/JeremyMet/DES/master/benchmark.png "Python/C Benchmark")</center>
 
 A DES is called #iterations time (from 10,000 to 100,000 with a 10,000 steps). Benchmark consists in computing DES(DES(...(DES(0x0))) where DES is called #iterations times.
 
