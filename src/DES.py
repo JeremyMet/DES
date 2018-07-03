@@ -9,24 +9,32 @@ BUFFER_SIZE = 128 # In bytes (at least 8 bytes)
 
 class DES(object):
 
+
     @staticmethod
-    def internal_encrypt_decrypt(input, key, encrypt = True):
-        LSH = lambda x, shf: ((x << shf) ^ (x >> (28-shf))) & 0xfffffff ;
+    def precompute_key(key):
+        LSH = lambda x, shf: ((x << shf) ^ (x >> (28 - shf))) & 0xfffffff;
         key = DES.apply_permutation(CP1, key, 64)
+        ret = [] ;
+        C = (key >> 28) & 0xfffffff;
+        D = key & 0xfffffff;
+        for i in range(16):
+            C = LSH(C, SHIFT[i]);
+            D = LSH(D, SHIFT[i]);
+            sub_key = DES.apply_permutation(CP2, (C << 28) ^ D, 56);
+            ret.append(sub_key) ;
+        DES.key_array = ret ;
+
+    @staticmethod
+    def internal_encrypt_decrypt(input, encrypt = True):
         ret = DES.apply_permutation(IP, input, 64) ;
-        C = (key >> 28) & 0xfffffff ;
-        D = key & 0xfffffff ;
         ## Run the 16 rounds of DES
         L = (ret >> 32) & 0xffffffff ;
         R = ret & 0xffffffff ;
         for i in range(16):
             if encrypt:
-                shift = SHIFT[i] ;
+                sub_key = DES.key_array[i]
             else:
-                shift = 28-SHIFT[16-i];
-            C = LSH(C, shift);
-            D = LSH(D, shift);
-            sub_key = DES.apply_permutation(CP2, (C << 28)^D, 56) ;
+                sub_key = DES.key_array[15-i]
             tmp_R = R ;
             R = DES.Feistel_Function(R, sub_key)^L ;
             L = tmp_R;
@@ -36,14 +44,14 @@ class DES(object):
 
     @staticmethod
     def encrypt(plain, key):
-        return DES.internal_encrypt_decrypt(plain, key, encrypt = True) ;
+        return DES.internal_encrypt_decrypt(plain, encrypt = True) ;
 
     @staticmethod
     def decrypt(cipher, key):
-        return DES.internal_encrypt_decrypt(cipher, key, encrypt = False);
+        return DES.internal_encrypt_decrypt(cipher, encrypt = False);
 
     @staticmethod
-    def internal_encrypt_decrypt_file_ECB(input_file, output_file, key, encrypt = True):
+    def internal_encrypt_decrypt_file_ECB(input_file, output_file, encrypt = True):
         fid_input = open(input_file, "rb");
         fid_output = open(output_file, "wb");
         # Header will contain the genuine file size.
@@ -76,11 +84,13 @@ class DES(object):
 
     @staticmethod
     def encrypt_file_ECB(input_file, output_file, key):
-        DES.internal_encrypt_decrypt_file_ECB(input_file, output_file, key, True) ;
+        DES.precompute_key(key);
+        DES.internal_encrypt_decrypt_file_ECB(input_file, output_file, True) ;
 
     @staticmethod
     def decrypt_file_ECB(input_file, output_file, key):
-        DES.internal_encrypt_decrypt_file_ECB(input_file, output_file, key, False);
+        DES.precompute_key(key);
+        DES.internal_encrypt_decrypt_file_ECB(input_file, output_file, False);
 
 
     @staticmethod
@@ -126,13 +136,19 @@ if __name__ == "__main__":
     key = int("8000000000000000", 16) ;
     plain = int("DEADBEEF", 16) ;
 
-    bench = [False, False, True] ;
+
+    bench = [True, False, False] ;
 
     ## Bench 0
     if bench[0]:
-        iteration = 100 ;
+        print(sys.argv)
+        if (len(sys.argv) >= 2):
+            iteration = int(sys.argv[1], 10) ;
+        else:
+            iteration = 1 ;
         start = time.time() ;
         cipher = plain ;
+        DES.precompute_key(key) ;
         for _ in range(iteration):
             cipher = DES.encrypt(cipher, key) ;
         end = time.time()-start ;
@@ -142,6 +158,7 @@ if __name__ == "__main__":
         print("Cipher: "+str(hex(cipher))) ;
         print("Computed in "+str(end)+" ms.") ;
         print(hex(DES.decrypt(cipher, key))) ;
+
 
 
     ## Bench 1
@@ -162,7 +179,6 @@ if __name__ == "__main__":
 
 
     ## Bench 2
-
     if bench[2]:
         input_file = sys.argv[1] ;
         output_file = sys.argv[2] ;
