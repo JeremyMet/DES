@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <string.h>
 #include "des.h"
 
 void print_unsigned_char_array_bin(unsigned char* array, unsigned int len_array) {
@@ -26,14 +28,14 @@ void print_unsigned_char_array_hex(unsigned char* array, unsigned int len_array)
 	printf("\n") ; 
 }
 
-char apply_SBOX(unsigned char S[4][16], unsigned char val) {
+char apply_SBOX(const unsigned char S[4][16], unsigned char val) {
 	unsigned char row = (((1 << 5) & val) >> 4)^(val & 1) ;
 	unsigned char column = ((val & 0x01E) >> 1) ; 
 	return S[row][column] ; 
 }
 
 // len_P, len_val are given in bit (should be a multiple of 8)
-void apply_Permutation(unsigned char P[], unsigned char* val, unsigned int len_P, unsigned int len_val, unsigned char* ret) {
+void apply_Permutation(const unsigned char P[], unsigned char* val, unsigned int len_P, unsigned int len_val, unsigned char* ret) {
 	int i; 
 	unsigned int input_char_index ; 
 	unsigned int input_bit_index ;
@@ -173,12 +175,13 @@ void internal_encrypt_decrypt(unsigned char* input, unsigned char* key, unsigned
 }
 
 
-void main() {
+void main(int argc, char* argv[]) {
 
 	unsigned char* key = malloc(8*sizeof(unsigned char)) ;
 	unsigned char* input = malloc(8*sizeof(unsigned char)) ;  
 	unsigned char* ret = malloc(8*sizeof(unsigned char)) ;  
 	int i ;
+	int iterations = atoi(argv[1]) ; 
 	key[0] = 0x80 ;  
 	for(i=1 ; i<8 ; i++)
 	{
@@ -188,8 +191,15 @@ void main() {
 	{
 		input[i] = 0 ; 
 	}
-	internal_encrypt_decrypt(input, key, ret) ; 
+	printf("Nb of iterations ... %i \n", iterations) ; 
+	clock_t begin = clock();
+	for(i=0;i<iterations;i++) {
+		internal_encrypt_decrypt(input, key, ret) ; 
+		memcpy(input, ret, 8) ; 
+	}
+	clock_t end = clock();
 	print_unsigned_char_array_hex(ret, 64) ; 
+	printf("Computed in %f \n", (double) (end-begin)/CLOCKS_PER_SEC) ; 
 	free(key) ; 
 	free(input) ; 
 	free(ret) ; 
