@@ -23,7 +23,7 @@ PS : Please note the DES constants part has been copied/pasted from Robin David'
 
 ## C Implementation
 
-The C implementation was written in order to compare performances (compiled language version interpreted language). The implementation was thought for 8-bit architecture, i.e. all operations are performed with byte granularity (no use of 16-bit or 32-bit integers or even bigger). Thus, this code could be utilized on small Arduino (as the Nano for instance). This is no surprise to observe a "gap". We observed (at least) a 10 speedup factor in favor of C. See below: 
+The C implementation was written in order to compare performances (compiled language versus interpreted language). The implementation was thought for 8-bit architecture, i.e. all operations are performed with byte granularity (no use of 16-bit or 32-bit integers or even bigger). Thus, this code could be utilized on small Arduino (as the Nano for instance). This is no surprise to observe a "gap". We observed (at least) a 10 speedup factor in favor of C. See below: 
 
 <img align="center" src=https://raw.githubusercontent.com/JeremyMet/DES/master/benchmark.png alt="benchmark">
 
