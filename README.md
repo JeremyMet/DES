@@ -28,10 +28,6 @@ The C implementation was written in order to compare performances (compiled lang
 <img align="center" src=https://raw.githubusercontent.com/JeremyMet/DES/master/benchmark.png alt="benchmark">
 
 
-A DES is called #iterations time (from 10,000 to 100,000 with a 10,000 steps). Benchmark consists in computing DES(DES(...(DES(0x0))) where DES is called #iterations times.
+A DES is called #iterations time (from 10,000 to 100,000 with a 10,000 steps). Benchmark consists in computing DES(DES(...(DES(0x0))) where DES is called #iterations times. Benchmarks were run on a 3.6 GHz machine.
 
-
-
-
-
-
+I don't really know how to "interpret" the results. This "gap" was actually expected. However, it is trully substantial. Maybe, I did not code in a "pythonic" way, plus I'm quite sure Python does not "like" bit-level operations.
