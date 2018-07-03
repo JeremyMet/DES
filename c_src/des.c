@@ -106,7 +106,6 @@ void apply_Feistel(unsigned char* half_block, unsigned char* subkey, unsigned ch
 	free(tmp_ret) ; 
 }
 
-// len_array is given in bits ; 
 // key is 56 bits. 
 void left_key_shift(unsigned char* key, unsigned int shift) {
 
@@ -125,28 +124,6 @@ void left_key_shift(unsigned char* key, unsigned int shift) {
 		key[6] = (key[6] << 1)^tmp_1 ; 
 	} 	
 }
-
-// len_array is given in bits ; 
-// key is 56 bits. 
-// Could used left_key_shift but then decryption would have been more "costly" than encryption :-(
-void right_key_shift(unsigned char* key, unsigned int shift) {
-
-	unsigned char tmp_0 ;
-	unsigned char tmp_1 ;  
-	int i ; int j ; 
-	// Bit granularity.
-	for(j=0 ; j < shift ; j++) {
-		tmp_0 = (key[3] >> 4) & 1 ;
-		tmp_1 = key[6] & 1 ;
-		for(i=6 ; i > 0 ; i--)
-		{
-			key[i] = (key[i] >> 1) ^ ((key[i-1] & 1) << 7) ;
-		}
-		key[0] = (key[0] >> 1) ^ (tmp_0 << 7) ; 
-		key[3] = (key[3] & 0xF7) ^ (tmp_1 << 3) ; 
-	} 	
-}
-
 
 void generate_round_keys_array(unsigned char* key, unsigned char** keys_array) {
 	unsigned char* permuted_key = malloc(sizeof(unsigned char)*7) ;
@@ -224,8 +201,8 @@ void main(int argc, char* argv[]) {
 	unsigned char* input = malloc(8*sizeof(unsigned char)) ;  
 	unsigned char* ret = malloc(8*sizeof(unsigned char)) ;  
 	int i ; 
-//	int iterations = atoi(argv[1]) ;
-	int iterations = 1 ;	
+	int iterations = atoi(argv[1]) ;
+//	int iterations = 1 ;	
 	// Initialize the key buffer, 
 	unsigned char** keys_array = malloc(16*sizeof(unsigned char*)) ;
 	for(i=0 ; i < 16 ; i++)
