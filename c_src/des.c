@@ -3,14 +3,25 @@
 #include <stdlib.h>
 #include "des.h"
 
-void print_unsigned_char_array(unsigned char* array, unsigned int len_array) {
+void print_unsigned_char_array_bin(unsigned char* array, unsigned int len_array) {
 	int i ;
 	int j ; 
 	unsigned int byte_len_array = (len_array >> 3) ; 
 	for(i=0 ; i < byte_len_array ; i++) {
 		for (j=7 ; j >= 0 ; j--) {
 			printf("%i", (array[i] >> j) &1) ; 
-		}		
+		}
+	}
+	printf("\n") ; 
+}
+
+void print_unsigned_char_array_hex(unsigned char* array, unsigned int len_array) {
+	int i ;
+	int j ; 
+	unsigned int byte_len_array = (len_array >> 3) ; 
+	printf("0x") ; 
+	for(i=0 ; i < byte_len_array ; i++) {
+		printf("%x", array[i]) ; 				
 	}
 	printf("\n") ; 
 }
@@ -22,8 +33,7 @@ char apply_SBOX(unsigned char S[4][16], unsigned char val) {
 }
 
 // len_P, len_val are given in bit (should be a multiple of 8)
-unsigned char* apply_Permutation(unsigned char P[], unsigned char* val, unsigned int len_P, unsigned int len_val) {
-	unsigned char* ret = (unsigned char*) malloc(sizeof(unsigned char)*(len_P >> 3)) ; 
+void apply_Permutation(unsigned char P[], unsigned char* val, unsigned int len_P, unsigned int len_val, unsigned char* ret) {
 	int i; 
 	unsigned int input_char_index ; 
 	unsigned int input_bit_index ;
@@ -31,6 +41,12 @@ unsigned char* apply_Permutation(unsigned char P[], unsigned char* val, unsigned
 	unsigned int output_bit_index ;  
 	unsigned int len_val_minus_one = len_val-1 ; 
 	unsigned int input_tmp_index ; 
+	// clean ret
+	for(i=0;i<(len_P>>3);i++)
+	{
+		ret[i] = 0 ; 
+	}
+	// apply permutation
 	for(i=0 ; i < len_P ; i++)
 	{
 		input_tmp_index = P[i]-1 ;
@@ -40,21 +56,20 @@ unsigned char* apply_Permutation(unsigned char P[], unsigned char* val, unsigned
 		output_bit_index =  7-(i & 0x7) ; 
 		ret[output_char_index] ^= ((val[input_char_index] >> (input_bit_index)) & 1) << (output_bit_index) ;
 	}
-	return ret ; 	
 }
 
-unsigned char* apply_Feistel(unsigned char* half_block, unsigned char* subkey) {
+void apply_Feistel(unsigned char* half_block, unsigned char* subkey, unsigned char* ret) {
 	// Apply the E permutation
-	unsigned char* tmp = apply_Permutation(E, half_block, 48, 32) ;  
+	unsigned char* tmp = malloc(sizeof(unsigned char)*6) ;
+	unsigned char* tmp_ret = malloc(sizeof(unsigned char)*4) ;  
+	apply_Permutation(E, half_block, 48, 32, tmp) ;  
 	// XOR with subkey
 	int i ; 
 	for(i=0 ; i < 6 ; i++)
 	{
 		tmp[i] ^= subkey[i] ; 
 	}
-	print_unsigned_char_array(tmp, 48) ;
 	// Iterate over all SBOX. 
-	unsigned char* ret = malloc(sizeof(unsigned char)*4) ; 
 	unsigned char current_bits ; 
 	unsigned char start = 0 ; 
 	unsigned char end = 5 ;
@@ -76,69 +91,108 @@ unsigned char* apply_Feistel(unsigned char* half_block, unsigned char* subkey) {
 		}
 		start += 6 ; 
 		end += 6 ;  
-
 		if ((i & 1) == 0) {
-			ret[i >> 1] = apply_SBOX(SBOX[0], current_bits) << 4 ; 
+			tmp_ret[i >> 1] = apply_SBOX(SBOX[i], current_bits) << 4 ; 
 		}
 		else {
-			ret[i >> 1] ^= apply_SBOX(SBOX[0], current_bits) ; 
+			tmp_ret[i >> 1] ^= apply_SBOX(SBOX[i], current_bits) ; 
 		} 
 	}
 	// Finale Permutation
+	apply_Permutation(P, tmp_ret, 32, 32, ret) ;
 	free(tmp) ; 
-	tmp = apply_Permutation(P, ret, 32, 32) ;
-	free(ret) ; 
-	ret = tmp ; 
-	return ret ; 
+	free(tmp_ret) ; 
 }
 
-// len_array is given in bits (should be a multiple of 8). 
-void left_shift_array(unsigned char* array, unsigned int len_array, unsigned int shift) {
+// len_array is given in bits ; 
+// key is 56 bits. 
+void key_shift(unsigned char* key, unsigned int shift) {
 
-	unsigned int byte_len_array = (len_array >> 3) ; 
-	unsigned int block_shift = (shift >> 3) ; 
-	unsigned int bit_shift = (shift & 0x7) ; 
-	unsigned char tmp ; 
+	unsigned char tmp_0 ;
+	unsigned char tmp_1 ;  
 	int i ; int j ; 
-	// Byte granularity.
-	for(j=0 ; j < block_shift ; j++) {
-		tmp = array[0] ; 
-		for(i=0 ; i < byte_len_array ; i++)
-		{
-			array[i] = array[i+1] ; 
-		}
-		array[byte_len_array-1] = tmp ; 
-	} 
 	// Bit granularity.
-	for(j=0 ; j < bit_shift ; j++) {
-		tmp = (array[0] >> 7) ;
-		for(i=0 ; i < byte_len_array-1 ; i++)
+	for(j=0 ; j < shift ; j++) {
+		tmp_0 = (key[0] >> 7) & 1 ;
+		tmp_1 = (key[3] >> 3) & 1 ;
+		for(i=0 ; i < 7 ; i++)
 		{
-			array[i] = (array[i] << 1) ^ (array[i+1] >> 7) ;
+			key[i] = (key[i] << 1) ^ (key[i+1] >> 7) ;
 		}
-		array[byte_len_array-1] = (array[byte_len_array-1] << 1 ^ tmp) ;
+		key[3] = (key[3] & 0xEF)^(tmp_0 << 4) ; 
+		key[6] ^= tmp_1 ; 
 	} 	
 }
 
-void main() {
-	printf("SBox %i \n", apply_SBOX(SBOX[0], 0)) ; 
-	char* key = malloc(6*sizeof(unsigned char)) ;
-	char* half_block = malloc(4*sizeof(unsigned char)) ;  
+void internal_encrypt_decrypt(unsigned char* input, unsigned char* key, unsigned char* ret)
+{
+	// Variables
 	int i ; 
-	for(i=0 ; i<6 ; i++)
+	unsigned char* permuted_key = malloc(sizeof(unsigned char)*7) ;
+	unsigned char* permuted_input = malloc(sizeof(unsigned char)*8) ; 
+	unsigned char* L = malloc(sizeof(unsigned char)*4) ; 
+	unsigned char* R = malloc(sizeof(unsigned char)*4) ;
+	unsigned char* tmp_R = malloc(sizeof(unsigned char)*4) ;  
+	unsigned char* subkey = malloc(sizeof(unsigned char)*6) ; // 48 bits subkey
+	// Initialisation. 
+	apply_Permutation(CP1, key, 56, 64, permuted_key) ; 
+	apply_Permutation(IP, input, 64, 64, permuted_input) ; 
+	for(i=0;i<4;i++) {
+		L[i] = permuted_input[i] ; 
+		R[i] = permuted_input[i+4] ; 
+	}
+	// Iterating over the 16 rounds of the DES algorithm. 
+	int round ; 
+	for(round=0 ; round < 16 ; round++) {
+  		key_shift(permuted_key, SHIFT[round]) ; 
+		apply_Permutation(CP2, permuted_key, 48, 56, subkey) ; 
+		// Apply Feistel
+		apply_Feistel(R, subkey, tmp_R) ; 
+		for(i=0;i<4;i++) {
+			tmp_R[i] ^= L[i] ; 
+			L[i] = R[i] ; 
+			R[i] = tmp_R[i] ; 
+		}
+	}
+	// L, R = R, L 
+	// We use the permuted_input array to store R || L before applying the last permutation
+	for(i=0;i<4;i++)
+	{
+		permuted_input[i] = R[i] ; 
+		permuted_input[i+4] = L[i] ;  
+	}
+	apply_Permutation(IP_1, permuted_input, 64, 64, ret) ; // We are done. 
+	// free tmp variables
+	free(permuted_key) ; 
+	free(permuted_input) ; 
+	free(L) ; 
+	free(R) ; 
+	free(tmp_R) ; 
+	free(subkey) ; 
+	
+}
+
+
+void main() {
+
+	unsigned char* key = malloc(8*sizeof(unsigned char)) ;
+	unsigned char* input = malloc(8*sizeof(unsigned char)) ;  
+	unsigned char* ret = malloc(8*sizeof(unsigned char)) ;  
+	int i ;
+	key[0] = 0x80 ;  
+	for(i=1 ; i<8 ; i++)
 	{
 		key[i] = 0 ; 
 	}
-	for(i=0 ; i<4 ; i++)
+	for(i=0 ; i<8 ; i++)
 	{
-		half_block[i] = 23*i ; 
+		input[i] = 0 ; 
 	}
-	char* ret = apply_Feistel(IP, key) ; 
-	print_unsigned_char_array(ret, 32) ;
-	left_shift_array(ret, 32, 9) ;
-	print_unsigned_char_array(ret, 32) ; 
+	internal_encrypt_decrypt(input, key, ret) ; 
+	print_unsigned_char_array_hex(ret, 64) ; 
 	free(key) ; 
-	free(half_block) ; 
+	free(input) ; 
 	free(ret) ; 
+
 	return ; 
 }
