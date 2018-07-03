@@ -1,5 +1,7 @@
 # DES
 
+## Python Implementation
+
 DES core program has been written in a C-like fashion with a lot of bit-level operators (as shifts <<, >> and so on).
 For now, one can only perform ECB encryption/decryption.
 The git includes a bash script that allows the user to encrypt/decrypt the content of a given folder recursively
@@ -18,3 +20,7 @@ Encryption/Decryption is not that fast (85 seconds to encrypt a 1.5 MB file on a
 If you meet any bug, don't hesitate to contact me ;-)
 
 PS : Please note the DES constants part has been copied/pasted from Robin David's git (https://github.com/RobinDavid/pydes).
+
+## C Implementation
+
+C Implementation has been coded in order to compare performances between Python versus a compiled language as C. The implementation was thought for 8-bit architecture, i.e. all operations are performed with byte granularity (no use of 16-bit or 32-bit integers). 
