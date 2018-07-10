@@ -28,7 +28,7 @@ The C implementation was written in order to compare performances (compiled lang
 <img align="center" src=https://raw.githubusercontent.com/JeremyMet/DES/master/benchmark.png alt="benchmark">
 
 
-A DES is called #iterations time (from 10,000 to 100,000 with a 10,000 steps). Benchmark consists in computing DES(DES(...(DES(0x0))) where DES is called #iterations times. Of course, we obtain a linear behaviour depending on #iterations.
+A DES is called #iterations times (from 10,000 to 100,000 with a 10,000 steps). Benchmark consists in computing DES(DES(...(DES(0x0))) where DES is called #iterations times. Of course, we obtain a linear behaviour depending on #iterations.
 Overall, a single DES computation time is reported in the following table.
 <p align="center">
   
