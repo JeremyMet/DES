@@ -32,7 +32,7 @@ A DES is called #iterations times (from 10,000 to 100,000 with a 10,000 steps). 
 Overall, a single DES computation time is reported in the following table.
 <p align="center">
   
-|                          | Python | C (Pentium @ 3.6 GHz)     | Arduino Nano (atmega328p @ 16 MHz)
+|                          | Python (Pentium @ 3.6 GHz) | C (Pentium @ 3.6 GHz)     | Arduino Nano (atmega328p @ 16 MHz)
 |--------------------------|--------|-------|-------|
 |  DES Execution Time (ms) |  &asymp; 0.268 | &asymp; 0.009 | &asymp; 63,8 |
 
