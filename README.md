@@ -43,6 +43,8 @@ I was quite amazed by the Nano performance !
 
 I don't really know how to "interpret" the results. This "gap" was actually expected. However, it is trully substantial. Maybe, I did not code in a "pythonic" way, plus I'm quite sure Python does not "like" bit-level operations that much.
 
+PS : Valgrind approved :-)
+
 ~~## What about saving the round keys once for all (in case DES is called several times with the same key) ?~~
 
 ~~Yes, it needs to be done (for both implementations).~~
