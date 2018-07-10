@@ -32,13 +32,14 @@ A DES is called #iterations times (from 10,000 to 100,000 with a 10,000 steps). 
 Overall, a single DES computation time is reported in the following table.
 <p align="center">
   
-|                          | Python | C     |
-|--------------------------|--------|-------|
-|  DES Execution Time (ms) |  &asymp; 0.268 | &asymp; 0.009 |
+|                          | Python | C (Pentium @ 3.6 GHz)     | Arduino Nano (atmega328p @ 16 MHz)
+|--------------------------|--------|-------|-------|
+|  DES Execution Time (ms) |  &asymp; 0.268 | &asymp; 0.009 | &asymp; 63,8 |
 
 </p>
 
-Benchmarks were run on a 3.6 GHz machine.
+Benchmarks were run on a 3.6 GHz machine/Arduino Nano @ 16 MHz.
+I was quite amazed by the Nano performance !
 
 I don't really know how to "interpret" the results. This "gap" was actually expected. However, it is trully substantial. Maybe, I did not code in a "pythonic" way, plus I'm quite sure Python does not "like" bit-level operations that much.
 
