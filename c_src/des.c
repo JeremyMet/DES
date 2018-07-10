@@ -41,7 +41,6 @@ void apply_Permutation(const unsigned char P[], unsigned char* val, unsigned int
 	unsigned int input_bit_index ;
 	unsigned int output_char_index ; 
 	unsigned int output_bit_index ;  
-	unsigned int len_val_minus_one = len_val-1 ; 
 	unsigned int input_tmp_index ; 
 	// clean ret
 	for(i=0;i<(len_P>>3);i++)
@@ -128,14 +127,11 @@ void left_key_shift(unsigned char* key, unsigned int shift) {
 void generate_round_keys_array(unsigned char* key, unsigned char** keys_array) {
 	unsigned char* permuted_key = malloc(sizeof(unsigned char)*7) ;
 	apply_Permutation(CP1, key, 56, 64, permuted_key) ; 	
-	unsigned char* subkey = malloc(sizeof(unsigned char)*6) ; // 48 bits subkey
 	int i ; 
 	for(i=0;i<16;i++) {
 		left_key_shift(permuted_key, SHIFT[i]) ; 
-		apply_Permutation(CP2, permuted_key, 48, 56, subkey) ; 		
-		memcpy(keys_array[i], subkey, 6) ; 
+		apply_Permutation(CP2, permuted_key, 48, 56, keys_array[i]) ; 		
 	}
-	free(subkey) ; 
 	free(permuted_key) ; 
 }
 
