@@ -61,8 +61,8 @@ void apply_Permutation(const unsigned char P[], unsigned char* val, unsigned int
 
 void apply_Feistel(unsigned char* half_block, unsigned char* subkey, unsigned char* ret) {
 	// Apply the E permutation
-	unsigned char* tmp = malloc(sizeof(unsigned char)*6) ;
-	unsigned char* tmp_ret = malloc(sizeof(unsigned char)*4) ;  
+	unsigned char tmp[6] ;
+	unsigned char tmp_ret[6] ; 
 	apply_Permutation(E, half_block, 48, 32, tmp) ;  
 	// XOR with subkey
 	int i ; 
@@ -101,8 +101,6 @@ void apply_Feistel(unsigned char* half_block, unsigned char* subkey, unsigned ch
 	}
 	// Finale Permutation
 	apply_Permutation(P, tmp_ret, 32, 32, ret) ;
-	free(tmp) ; 
-	free(tmp_ret) ; 
 }
 
 // key is 56 bits. 
@@ -142,10 +140,10 @@ void internal_encrypt_decrypt(unsigned char* input, unsigned char** keys_array, 
 {
 	// Variables
 	int i ; 
-	unsigned char* permuted_input = malloc(sizeof(unsigned char)*8) ; 
-	unsigned char* L = malloc(sizeof(unsigned char)*4) ; 
-	unsigned char* R = malloc(sizeof(unsigned char)*4) ;
-	unsigned char* tmp_R = malloc(sizeof(unsigned char)*4) ;  
+	unsigned char permuted_input[8] ;
+	unsigned char L[4] ; 
+	unsigned char R[4] ; 
+	unsigned char tmp_R[4] ; 
 	// Initialisation. 
 	apply_Permutation(IP, input, 64, 64, permuted_input) ; 
 	for(i=0;i<4;i++) {
@@ -175,11 +173,6 @@ void internal_encrypt_decrypt(unsigned char* input, unsigned char** keys_array, 
 		permuted_input[i+4] = L[i] ;  
 	}
 	apply_Permutation(IP_1, permuted_input, 64, 64, ret) ; // We are done. 
-	// free tmp variables
-	free(permuted_input) ; 
-	free(L) ; 
-	free(R) ; 
-	free(tmp_R) ; 	
 }
 
 void encrypt(unsigned char* input, unsigned char** keys_array, unsigned char* ret) {
