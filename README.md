@@ -50,3 +50,8 @@ PS : Valgrind approved :-)
 ~~## What about saving the round keys once for all (in case DES is called several times with the same key) ?~~
 
 ~~Yes, it needs to be done (for both implementations).~~
+
+## Makefile
+
+Run make in the main folder to compile the C code (gcc).
+Type make benchmark to run the benchmark. Note the bench requires gnuplot for graph generation.
