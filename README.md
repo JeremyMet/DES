@@ -54,4 +54,4 @@ PS : Valgrind approved :-)
 ## Makefile
 
 Run make in the main folder to compile the C code (gcc).
-Type make benchmark to run the benchmark. Note the bench requires gnuplot for graph generation.
+Type **make benchmark** to run the benchmark. Note the bench requires gnuplot for graph generation. If not installed, the generation will fail but results could be read from *benchmark.txt*.
