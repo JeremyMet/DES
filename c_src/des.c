@@ -122,21 +122,20 @@ void left_key_shift(unsigned char* key, unsigned int shift) {
 	} 	
 }
 
-void generate_round_keys_array(unsigned char* key, unsigned char** keys_array) {
-	unsigned char* permuted_key = malloc(sizeof(unsigned char)*7) ;
+void generate_round_keys_array(unsigned char* key, unsigned char keys_array[16][6]) {
+	unsigned char permuted_key[7] = {0};
 	apply_Permutation(CP1, key, 56, 64, permuted_key) ; 	
 	int i ; 
 	for(i=0;i<16;i++) {
-		left_key_shift(permuted_key, SHIFT[i]) ; 
+		left_key_shift(permuted_key, SHIFT[i]); 
 		apply_Permutation(CP2, permuted_key, 48, 56, keys_array[i]) ; 		
 	}
-	free(permuted_key) ; 
 }
 
 // op == 'E' for Encryption
 // op == 'D" for Decryption
 
-void internal_encrypt_decrypt(unsigned char* input, unsigned char** keys_array, unsigned char* ret, char op)
+void internal_encrypt_decrypt(unsigned char* input, unsigned char keys_array[16][6], unsigned char* ret, char op)
 {
 	// Variables
 	int i ; 
@@ -175,59 +174,25 @@ void internal_encrypt_decrypt(unsigned char* input, unsigned char** keys_array, 
 	apply_Permutation(IP_1, permuted_input, 64, 64, ret) ; // We are done. 
 }
 
-void encrypt(unsigned char* input, unsigned char** keys_array, unsigned char* ret) {
+void encrypt(unsigned char* input, unsigned char keys_array[16][6], unsigned char* ret) {
 	internal_encrypt_decrypt(input, keys_array, ret, 'E') ; 
 }
 
-void decrypt(unsigned char* input, unsigned char** keys_array, unsigned char* ret) {
+void decrypt(unsigned char* input, unsigned char keys_array[16][6], unsigned char* ret) {
 	internal_encrypt_decrypt(input, keys_array, ret, 'D') ; 
 }
 
 
 void main(int argc, char* argv[]) {
-
-	unsigned char* key = malloc(8*sizeof(unsigned char)) ;
-	unsigned char* input = malloc(8*sizeof(unsigned char)) ;  
-	unsigned char* ret = malloc(8*sizeof(unsigned char)) ;  
-	int i ; 
-	int iterations = atoi(argv[1]) ;
-//	int iterations = 1 ;	
-	// Initialize the key buffer, 
-	unsigned char** keys_array = malloc(16*sizeof(unsigned char*)) ;
-	for(i=0 ; i < 16 ; i++)
-	{
-		keys_array[i] = malloc(6*sizeof(unsigned char*)) ; 
-	}	
-	key[0] = 0x80 ;  
-	for(i=1 ; i<8 ; i++)
-	{
-		key[i] = 0 ; 
-	}
-	generate_round_keys_array(key, keys_array) ;  
-	// Initialize the input. 
-	for(i=0 ; i < 8 ; i++)
-	{
-		input[i] = 0 ; 
-	}
-	printf("Nb of iterations ... %i \n", iterations) ; 
-	clock_t begin = clock();
-	for(i=0;i<iterations;i++) {
-		encrypt(input, keys_array, ret) ; 
-		memcpy(input, ret, 8) ; 
-	}
-	clock_t end = clock();
-	print_unsigned_char_array_hex(ret, 64) ; 
-	printf("Computed in %f \n", (double) (end-begin)/CLOCKS_PER_SEC) ; 
-	// Free variables
-	free(key) ; 
-	free(input) ; 
-	free(ret) ; 
-	// Free key buffer
-	for(i=0;i<16;i++)
-	{
-		free(keys_array[i]) ; 
-	}
-	free(keys_array) ; 
-	// ...
-	return ; 
+    unsigned char key[] = {0x00, 0x1e, 0x15, 0x16, 0x28, 0x70, 0x55, 0xa6};
+    unsigned char in[]  = {0x3a, 0xd7, 0x7b, 0xb4, 0x0d, 0x7a, 0x36, 0x60};
+	unsigned char out[8] = {};	
+	unsigned char keys_array[16][6] = {0};
+	int i, j;	
+	memcpy(in, argv[1], 8);	  
+	memcpy(in, argv[1], 8);
+	generate_round_keys_array(key, keys_array) ;
+	encrypt(in, keys_array, out) ;  	
 }
+
+
